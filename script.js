@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const loadFactor = 0.00001; // Additional CO2 per kg of load per km
 
     // Gemini API setup
-    const API_KEY = 'AIzaSyBisrCAxpsyh7PedVStXAKyia5c_nuq22w'; // Replace with your Gemini API key
+    const API_KEY = 'AIzaSyBisrCAxpsyh7PedVStXAKyia5c_nuq22w';
 
     async function geocode(address) {
         const response = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(address)},India&format=json&limit=1`);
