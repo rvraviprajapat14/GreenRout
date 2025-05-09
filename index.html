@@ -1,0 +1,133 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GreenRoute - CO2 Emission Tracking</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="styles.css" />
+    <script src="script.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>GreenRoute - CO2 Emission Tracker</h1>
+        <div class="controls">
+            <select id="start">
+                <option value="" disabled selected>Select Start City</option>
+                <option value="Mumbai">Mumbai</option>
+                <option value="Delhi">Delhi</option>
+                <option value="Bangalore">Bangalore</option>
+                <option value="Hyderabad">Hyderabad</option>
+                <option value="Chennai">Chennai</option>
+                <option value="Kolkata">Kolkata</option>
+                <option value="Pune">Pune</option>
+                <option value="Ahmedabad">Ahmedabad</option>
+            </select>
+            <select id="end">
+                <option value="" disabled selected>Select End City</option>
+                <option value="Mumbai">Mumbai</option>
+                <option value="Delhi">Delhi</option>
+                <option value="Bangalore">Bangalore</option>
+                <option value="Hyderabad">Hyderabad</option>
+                <option value="Chennai">Chennai</option>
+                <option value="Kolkata">Kolkata</option>
+                <option value="Pune">Pune</option>
+                <option value="Ahmedabad">Ahmedabad</option>
+            </select>
+            <select id="vehicle">
+                <option value="truck">Truck</option>
+                <option value="van">Van</option>
+            </select>
+            <select id="fuel">
+                <option value="diesel">Diesel B7</option>
+                <option value="petrol">Petrol</option>
+                <option value="electric">Electric</option>
+            </select>
+            <select id="terrain">
+                <option value="flat">Flat</option>
+                <option value="hilly">Hilly</option>
+                <option value="mountainous">Mountainous</option>
+            </select>
+            <select id="road">
+                <option value="highway">Highway</option>
+                <option value="urban">Urban</option>
+                <option value="rural">Rural</option>
+            </select>
+            <input id="load" type="number" placeholder="Load Weight (kg)" min="0" />
+            <select id="optimize">
+                <option value="distance">Optimize by Distance</option>
+                <option value="time">Optimize by Time</option>
+                <option value="emissions">Optimize by Emissions</option>
+            </select>
+            <button onclick="calculateTrip()">Fetch Trip Data</button>
+            <button class="reset-btn" onclick="resetForm()">Reset</button>
+        </div>
+        <div id="map"></div>
+        <div class="summary" id="summary"></div>
+        <div class="city-emissions" id="city-emissions"></div>
+        <div class="reasoning" id="reasoning"></div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+    <script src="script.js"></script>
+<script>
+(function()
+{function c()
+{var b=a.contentDocument||a.contentWindow.document;
+if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'93c9886c3d8fbd58',t:'MTc0NjcxMzM0Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";
+b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');
+a.height=1;
+a.width=1;
+a.style.position='absolute';
+a.style.top=0;
+a.style.left=0;
+a.style.border='none';
+a.style.visibility='hidden';
+document.body.appendChild(a);
+if('loading'!==document.readyState)c();
+else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);
+else{var e=document.onreadystatechange||function(){};
+document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();
+</script>
+</body>
+</html>
